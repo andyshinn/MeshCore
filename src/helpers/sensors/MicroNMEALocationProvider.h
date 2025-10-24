@@ -61,9 +61,11 @@ public :
         if (_peripher_power) _peripher_power->claim();
         if (_pin_en != -1) {
             digitalWrite(_pin_en, PIN_GPS_EN_ACTIVE);
+            MESH_DEBUG_PRINTLN("GPS enable pin %d set to active",_pin_en);
         }
         if (_pin_reset != -1) {
             digitalWrite(_pin_reset, !GPS_RESET_FORCE);
+            MESH_DEBUG_PRINTLN("GPS reset pin %d set to inactive",_pin_reset);
         }
     }
 
@@ -79,7 +81,7 @@ public :
         if (_pin_en != -1) {
             digitalWrite(_pin_en, !PIN_GPS_EN_ACTIVE);
         }
-        if (_peripher_power) _peripher_power->release();  
+        if (_peripher_power) _peripher_power->release();
     }
 
     bool isEnabled() override {
@@ -87,15 +89,17 @@ public :
         // activated/deactivated outside of here ...
         if (_pin_en != -1) {
             return digitalRead(_pin_en) == PIN_GPS_EN_ACTIVE;
+            MESH_DEBUG_PRINTLN("GPS enable pin %d state is %d",_pin_en,digitalRead(_pin_en));
         } else {
             return true; // no enable so must be active
+            MESH_DEBUG_PRINTLN("GPS enable pin not defined, assuming GPS is enabled");
         }
     }
 
     void syncTime() override { nmea.clear(); LocationProvider::syncTime(); }
     long getLatitude() override { return nmea.getLatitude(); }
     long getLongitude() override { return nmea.getLongitude(); }
-    long getAltitude() override { 
+    long getAltitude() override {
         long alt = 0;
         nmea.getAltitude(alt);
         return alt;
@@ -103,10 +107,10 @@ public :
     long satellitesCount() override { return nmea.getNumSatellites(); }
     bool isValid() override { return nmea.isValid(); }
 
-    long getTimestamp() override { 
+    long getTimestamp() override {
         DateTime dt(nmea.getYear(), nmea.getMonth(),nmea.getDay(),nmea.getHour(),nmea.getMinute(),nmea.getSecond());
         return dt.unixtime();
-    } 
+    }
 
     void sendSentence(const char *sentence) override {
         nmea.sendSentence(*_gps_serial, sentence);

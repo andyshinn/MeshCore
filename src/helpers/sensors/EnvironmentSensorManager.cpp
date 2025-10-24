@@ -537,7 +537,7 @@ void EnvironmentSensorManager::initBasicGPS() {
   gps_active = false; //Set GPS visibility off until setting is changed
 }
 
-// gps code for rak might be moved to MicroNMEALoactionProvider 
+// gps code for rak might be moved to MicroNMEALoactionProvider
 // or make a new location provider ...
 #ifdef RAK_WISBLOCK_GPS
 void EnvironmentSensorManager::rakGPSInit(){
@@ -552,16 +552,16 @@ void EnvironmentSensorManager::rakGPSInit(){
 
   //search for the correct IO standby pin depending on socket used
   if(gpsIsAwake(WB_IO2)){
-  //  MESH_DEBUG_PRINTLN("RAK base board is RAK19007/10");
-  //  MESH_DEBUG_PRINTLN("GPS is installed on Socket A");
+   MESH_DEBUG_PRINTLN("RAK base board is RAK19007/10");
+   MESH_DEBUG_PRINTLN("GPS is installed on Socket A");
   }
   else if(gpsIsAwake(WB_IO4)){
-  //  MESH_DEBUG_PRINTLN("RAK base board is RAK19003/9");
-  //  MESH_DEBUG_PRINTLN("GPS is installed on Socket C");
+   MESH_DEBUG_PRINTLN("RAK base board is RAK19003/9");
+   MESH_DEBUG_PRINTLN("GPS is installed on Socket C");
   }
   else if(gpsIsAwake(WB_IO5)){
-  //  MESH_DEBUG_PRINTLN("RAK base board is RAK19001/11");
-  //  MESH_DEBUG_PRINTLN("GPS is installed on Socket F");
+   MESH_DEBUG_PRINTLN("RAK base board is RAK19001/11");
+   MESH_DEBUG_PRINTLN("GPS is installed on Socket F");
   }
   else{
     MESH_DEBUG_PRINTLN("No GPS found");

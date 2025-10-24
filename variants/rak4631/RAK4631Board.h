@@ -20,7 +20,7 @@
 #define PIN_GPS_1PPS      17  //GPS PPS pin
 #define GPS_BAUD_RATE   9600
 #define GPS_ADDRESS   0x42  //i2c address for GPS
- 
+
 #define SX126X_DIO2_AS_RF_SWITCH  true
 #define SX126X_DIO3_TCXO_VOLTAGE   1.8
 
