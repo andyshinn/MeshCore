@@ -1,0 +1,16 @@
+index,name,lora_freq,lora_bw,lora_sf,lora_cr,status
+1,ATXMC-001,910.525,62.5,7,5,flashed
+2,ATXMC-002,910.525,62.5,7,5,pending
+3,ATXMC-003,910.525,62.5,7,5,pending
+4,ATXMC-004,910.525,62.5,7,5,pending
+5,ATXMC-005,910.525,62.5,7,5,pending
+6,ATXMC-006,910.525,62.5,7,5,pending
+7,ATXMC-007,910.525,62.5,7,5,pending
+8,ATXMC-008,910.525,62.5,7,5,pending
+9,ATXMC-009,910.525,62.5,7,5,pending
+10,ATXMC-010,910.525,62.5,7,5,pending
+11,ATXMC-011,910.525,62.5,7,5,pending
+12,ATXMC-012,910.525,62.5,7,5,pending
+13,ATXMC-013,910.525,62.5,7,5,pending
+14,ATXMC-014,910.525,62.5,7,5,pending
+15,ATXMC-015,910.525,62.5,7,5,pending
