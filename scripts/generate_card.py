@@ -202,7 +202,8 @@ def draw_first_contact_section(c: canvas.Canvas, y_cursor: float) -> float:
     blurb = (
         'Test your connection to nearby repeaters by sending a message '
         'to the "Public" channel. If your message was heard and repeated '
-        'you will see a "1 Repeats" under the message bubble.'
+        'you will see a "1 Repeats" under the message bubble. '
+        'You can now send a "Flood Advert" to announce your node.'
     )
 
     y -= 12
@@ -221,13 +222,22 @@ def draw_tips_section(c: canvas.Canvas, y_cursor: float) -> float:
     tips = [
         "Charges can last a couple days to a full week.",
         "Disable GPS for better battery life.",
+        "Flash updates using the Heltec T114 BLE companion MeshCore firmware."
     ]
 
     y -= 13
+    bullet = "•  "
+    bullet_x = MARGIN + 8
+    text_x = bullet_x + c.stringWidth(bullet, "Ubuntu", 8)
+    text_w = CONTENT_W - (text_x - MARGIN)
     for tip in tips:
         c.setFont("Ubuntu", 8)
-        c.drawString(MARGIN + 8, y, f"•  {tip}")
-        y -= 11.5
+        c.drawString(bullet_x, y, bullet)
+        y = draw_wrapped_text(
+            c, text_x, y, tip,
+            font="Ubuntu", size=8,
+            max_width=text_w, leading=11.5,
+        )
 
     return y
 
