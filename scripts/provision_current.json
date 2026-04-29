@@ -1,0 +1,10 @@
+{
+  "name": "ATXMC-001",
+  "pin": 812865,
+  "lora_freq": 910.525,
+  "lora_bw": 62.5,
+  "lora_sf": 7,
+  "lora_cr": 5,
+  "firmware_version": "ATXMC-v1.14.1",
+  "firmware_build_date": "02-Apr-2026"
+}
