@@ -25,9 +25,9 @@
 #define VBAT_AR_INTERNAL                AR_INTERNAL_3_0
 #define ADC_MULTIPLIER                  1.537
 #define ADC_RESOLUTION                  14
-#define PIN_BATTERY_CHARGING              (32+2)  // P1.02 STAT2 
+#define PIN_BATTERY_CHARGING              (32+2)  // P1.02 STAT2
 #define PIN_CHARGER_FAULT                 (27)   // P0.27 STAT1 this pin is disabled on meshtastic.
-// BQ25185 has 2 status pins: STAT1 and STAT2. Both are high when not charging. STAT1 high, STAT2 low: charging. Recoverable fault: STAT1 low, STAT2 high. Unrecoverable fault: both low. 
+// BQ25185 has 2 status pins: STAT1 and STAT2. Both are high when not charging. STAT1 high, STAT2 low: charging. Recoverable fault: STAT1 low, STAT2 high. Unrecoverable fault: both low.
 // We only need to detect charging vs not charging, but someone else can use the fault pin to log when the battery gets too hot or cold.
 
 // Power management boot protection threshold (millivolts)
@@ -35,13 +35,13 @@
 
 // LPCOMP wake configuration (voltage recovery from SYSTEMOFF)
 #define PWRMGT_LPCOMP_AIN       7      // AIN7 = P0.31 = PIN_VBAT_READ
-#define PWRMGT_LPCOMP_REFSEL    4       // 5/8 VDD (~3.13-3.44V) was the default on RAK4631. should still apply here. 
+#define PWRMGT_LPCOMP_REFSEL    4       // 5/8 VDD (~3.13-3.44V) was the default on RAK4631. should still apply here.
 
 // Other pins
 #define PIN_AREF             (-1)
-#define SCREEN_12V_ENABLE   (23) // SH1107 OLED controller has a pin that needs to be enabled to turn on the screen. 
+#define SCREEN_12V_ENABLE   (23) // SH1107 OLED controller has a pin that needs to be enabled to turn on the screen.
 
-static const uint8_t AREF = (PIN_AREF); // not used 
+static const uint8_t AREF = (PIN_AREF); // not used
 
 ////////////////////////////////////////////////////////////////////////////////
 // Number of pins
@@ -86,7 +86,7 @@ static const uint8_t AREF = (PIN_AREF); // not used
 // Builtin LEDs
 
 #define LED_BUILTIN             (35)
-#define LED_BLUE                (-1)            // P1.04 turned off, because the blue LED was annoying. 
+#define LED_BLUE                (-1)            // P1.04 turned off, because the blue LED was annoying.
 // #define LED_GREEN               (35)            // P1.03
 #define LED_PIN                 LED_BUILTIN
 
@@ -108,18 +108,33 @@ static const uint8_t AREF = (PIN_AREF); // not used
 #define PIN_BACK_BTN            PIN_BUTTON6
 
 ////////////////////////////////////////////////////////////////////////////////
-// LR1121
+// LoRa radio
+//
+// The Muzi Base PCB is populated with one of two radios:
+//   * Base Uno -> SX1262  (USE_SX1262)
+//   * Base Duo -> LR1121  (USE_LR1121)
+// Both share NSS/SCLK/MISO/MOSI/RESET/BUSY. The only pin difference is the
+// radio IRQ (DIO1): the SX1262 routes it to P1.06, the LR1121 to P1.08.
+// (see Meshtastic muzi_base variant, which defines both radios on this board)
 
-#define LORA_DIO_1              (32+8)            // P1.08
 #define LORA_NSS                (PIN_SPI_NSS)   // P1.12
-#define LORA_RESET              (32+10)            // P1.10
-#define LORA_BUSY               (32+11)             // P1.11
-#define LORA_SCLK               (PIN_SPI_SCK) 
-#define LORA_MISO               (PIN_SPI_MISO)
-#define LORA_MOSI               (PIN_SPI_MOSI)
- 
-#define LR11X0_DIO_AS_RF_SWITCH    true
-#define LR11X0_DIO3_TCXO_VOLTAGE   3.0
+#define LORA_RESET              (32+10)         // P1.10
+#define LORA_BUSY               (32+11)         // P1.11
+#define LORA_SCLK               (PIN_SPI_SCK)   // P1.13
+#define LORA_MISO               (PIN_SPI_MISO)  // P1.15
+#define LORA_MOSI               (PIN_SPI_MOSI)  // P1.14
+
+#if defined(USE_LR1121)
+  #define LORA_DIO_1              (32+8)            // P1.08  LR1121 IRQ/DIO1
+  #define LR11X0_DIO_AS_RF_SWITCH    true
+  #define LR11X0_DIO3_TCXO_VOLTAGE   3.0
+#elif defined(USE_SX1262)
+  #define LORA_DIO_1              (32+6)            // P1.06  SX1262 IRQ/DIO1
+  #define SX126X_DIO2_AS_RF_SWITCH   1
+  #define SX126X_DIO3_TCXO_VOLTAGE   3.3
+#else
+  #error "muzi_base: no radio selected (define USE_LR1121 or USE_SX1262)"
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // QSPI Flash
@@ -138,9 +153,9 @@ static const uint8_t AREF = (PIN_AREF); // not used
 #define HAS_GPS                 1
 #define PIN_GPS_RX              PIN_SERIAL1_RX
 #define PIN_GPS_TX              PIN_SERIAL1_TX
-#define GPS_EN_GPIO                  (32+1)            // P1.01 PWR_IO2 on schematic. just cuts power to gps. 
+#define GPS_EN_GPIO                  (32+1)            // P1.01 PWR_IO2 on schematic. just cuts power to gps.
 
 ////////////////////////////////////////////////////////////////////////////////
 // Buzzer
 
-#define BUZZER_PIN              (22)            // P0.22 same load switch design as GPS_EN. 
+#define BUZZER_PIN              (22)            // P0.22 same load switch design as GPS_EN.

@@ -5,7 +5,7 @@
     },
     "core": "nRF5",
     "cpu": "cortex-m4",
-    "extra_flags": "-DARDUINO_NRF52840_MUZI_BASE_DUO -DNRF52840_XXAA",
+    "extra_flags": "-DARDUINO_NRF52840_MUZI_BASE -DNRF52840_XXAA",
     "f_cpu": "64000000L",
     "hwids": [
       [
@@ -21,9 +21,9 @@
         "0x002A"
       ]
     ],
-    "usb_product": "muzi_base_duo",
+    "usb_product": "muzi_base",
     "mcu": "nrf52840",
-    "variant": "MUZI_BASE_DUO",
+    "variant": "MUZI_BASE",
     "bsp": {
       "name": "adafruit"
     },
@@ -51,7 +51,7 @@
   "frameworks": [
     "arduino"
   ],
-  "name": "Muzi Base Duo",
+  "name": "Muzi Base",
   "upload": {
     "maximum_ram_size": 248832,
     "maximum_size": 815104,

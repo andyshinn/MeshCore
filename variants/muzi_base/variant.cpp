@@ -85,5 +85,5 @@ void initVariant()
   digitalWrite(GPS_EN_GPIO, HIGH); // needs to turn on for GPS detection
 
   pinMode(SCREEN_12V_ENABLE, OUTPUT);
-  digitalWrite(SCREEN_12V_ENABLE, LOW); // disable 12V power for SH1107 display for now. 
+  digitalWrite(SCREEN_12V_ENABLE, LOW); // disable 12V power for SH1107 display for now.
 }

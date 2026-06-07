@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include "muzi_base_duoBoard.h"
+#include "muzi_baseBoard.h"
 
 #ifdef NRF52_POWER_MANAGEMENT
 const PowerMgtConfig power_config = {
@@ -10,7 +10,7 @@ const PowerMgtConfig power_config = {
   .voltage_bootlock = PWRMGT_VOLTAGE_BOOTLOCK
 };
 
-void muzi_base_duoBoard::initiateShutdown(uint8_t reason) {
+void muzi_baseBoard::initiateShutdown(uint8_t reason) {
   // Disable LoRa module power before shutdown
   if (reason == SHUTDOWN_REASON_LOW_VOLTAGE ||
       reason == SHUTDOWN_REASON_BOOT_PROTECT) {
@@ -21,13 +21,13 @@ void muzi_base_duoBoard::initiateShutdown(uint8_t reason) {
 }
 #endif // NRF52_POWER_MANAGEMENT
 
-void muzi_base_duoBoard::begin() {
+void muzi_baseBoard::begin() {
   NRF52BoardDCDC::begin();
   pinMode(PIN_VBAT_READ, INPUT);
   pinMode(SCREEN_12V_ENABLE, OUTPUT);
   digitalWrite(SCREEN_12V_ENABLE, HIGH); // Enable 12V power for SH1107 display
   delay(250);
-  Wire.begin(); 
+  Wire.begin();
   // delay(1000); // wait for display to initialize. otherwise it doesn't come up on boot.
 
 #ifdef PIN_USER_BTN
@@ -46,5 +46,4 @@ void muzi_base_duoBoard::begin() {
 #ifdef NRF52_POWER_MANAGEMENT
   checkBootVoltage(&power_config);
 #endif
-  // delay(10);   // give LR1121 some time to power up
 }
