@@ -2,23 +2,47 @@
 
 #include <MeshCore.h>
 #include <Arduino.h>
-#include <helpers/NRF52Board.h>
+
+#if defined(NRF54_PLATFORM)
+  #include <helpers/NRF54Board.h>
+  #include <helpers/NPM1300.h>
+  using MMMBoardBase  = NRF54BoardDCDC;
+  using MMMBoardVBase = NRF54Board;    // the virtual base, for ctor init
+#else
+  #include <helpers/NRF52Board.h>
+  using MMMBoardBase  = NRF52BoardDCDC;
+  using MMMBoardVBase = NRF52Board;
+#endif
 
 #define  PIN_VBAT_READ 17
 #define  ADC_MULTIPLIER   (1.815f) // dependent on voltage divider resistors. TODO: more accurate battery tracking
 
-class MMMBoard : public NRF52BoardDCDC {
+class MMMBoard : public MMMBoardBase {
 protected:
   uint8_t btn_prev_state;
   float adc_mult = ADC_MULTIPLIER;
+#if defined(NRF54_PLATFORM)
+  NPM1300 pmic;
+#endif
 
 public:
-  MMMBoard() : NRF52Board("MMM_OTA") {}
+  MMMBoard() : MMMBoardVBase("MMM_OTA") {}
   void begin();
 
   #define BATTERY_SAMPLES 8
 
   uint16_t getBattMilliVolts() override {
+  #if defined(NRF54_PLATFORM)
+    /*
+     * The XIAO nRF54LM20A has no GPIO resistor divider; battery voltage comes
+     * from the on-board nPM1300 PMIC on its private I2C bus (Wire1). The PMIC
+     * measures VBAT directly, so adc_mult does not apply here.
+     *
+     * Returns 0 if the PMIC did not probe, which reports "unknown" rather
+     * than a fabricated reading.
+     */
+    return pmic.getBattMilliVolts();
+  #else
     analogReadResolution(12);
 
     uint32_t raw = 0;
@@ -27,6 +51,7 @@ public:
     }
     raw = raw / BATTERY_SAMPLES;
     return (adc_mult * raw);
+  #endif
   }
 
   bool setAdcMultiplier(float multiplier) override {

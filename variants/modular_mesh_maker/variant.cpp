@@ -81,5 +81,12 @@
     31, // D32 is P0.31 (VBAT)
   };
 
+#elif defined(XIAO_NRF54LM20A)
+  // No pin map here: the nRF54L core's own xiao_nrf54lm20a variant defines
+  // g_ADigitalPinMap and initVariant(). See the note in variant.h.
+
 #endif
+
+#if !defined(XIAO_NRF54LM20A)
 void initVariant() {}
+#endif

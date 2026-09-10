@@ -204,4 +204,34 @@
     // On-board QSPI Flash
     #define EXTERNAL_FLASH_DEVICES  (P25Q16H)
     #define EXTERNAL_FLASH_USE_QSPI
+
+#elif defined(XIAO_NRF54LM20A)
+    /*
+     * Seeed XIAO nRF54LM20A.
+     *
+     * Unlike the nRF52 targets above, MeshCore does NOT define this board's pin
+     * map. The nRF54L Arduino core ships a complete variant for it
+     * (framework-arduinoadafruitnrf54/variants/xiao_nrf54lm20a), including the
+     * SERIALn/TWIM instance assignments that this chip needs and that a
+     * MeshCore-side copy could not get right on its own.
+     *
+     * That variant cannot simply be included by name: this file is also called
+     * variant.h and -I variants/modular_mesh_maker precedes the framework's
+     * variant directory, so Arduino.h's #include "variant.h" lands here first.
+     * #include_next resumes the search after this directory and picks up the
+     * framework's file, so the core's variant stays the single source of truth.
+     *
+     * Carrier-side pin numbers (LoRa, I2C, button) are supplied as -D flags in
+     * variants/modular_mesh_maker/platformio.ini, keyed to XIAO silkscreen
+     * positions D0..D10, exactly as they are for the nRF52840 XIAO.
+     */
+    #include_next <variant.h>
+
+    // The MMM carrier wires I2C to D6/D7, not the XIAO default D4/D5, so override
+    // what the framework variant just defined.
+    #undef  PIN_WIRE_SDA
+    #undef  PIN_WIRE_SCL
+    #define PIN_WIRE_SDA            (6)
+    #define PIN_WIRE_SCL            (7)
+
 #endif
