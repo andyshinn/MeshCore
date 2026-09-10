@@ -632,7 +632,7 @@ bool EnvironmentSensorManager::begin() {
   #endif
 
   #if ENV_PIN_SDA && ENV_PIN_SCL
-    #ifdef NRF52_PLATFORM
+    #if defined(NRF52_PLATFORM) || defined(NRF54_PLATFORM)
   Wire1.setPins(ENV_PIN_SDA, ENV_PIN_SCL);
   Wire1.setClock(100000);
   Wire1.begin();

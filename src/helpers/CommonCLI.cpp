@@ -141,7 +141,7 @@ void CommonCLI::loadPrefsInt(FILESYSTEM* fs, const char* filename) {  // Legacy 
 }
 
 bool CommonCLI::savePrefs(FILESYSTEM* fs) {
-#if defined(NRF52_PLATFORM) || defined(STM32_PLATFORM)
+#if defined(NRF52_PLATFORM) || defined(NRF54_PLATFORM) || defined(STM32_PLATFORM)
   fs->remove("/prefs.json");
   File file = fs->open("/prefs.json", FILE_O_WRITE);
 #elif defined(RP2040_PLATFORM)
@@ -410,7 +410,7 @@ void CommonCLI::handleCommand(uint32_t sender_timestamp, char* command, char* re
       }
 #endif
     } else if (memcmp(command, "powersaving on", 14) == 0) {
-#if defined(NRF52_PLATFORM)
+#if defined(NRF52_PLATFORM) || defined(NRF54_PLATFORM)
       _prefs->powersaving_enabled = 1;
       savePrefs();
       strcpy(reply, "on - Immediate effect");
@@ -754,7 +754,7 @@ void CommonCLI::handleGetCmd(uint32_t sender_timestamp, char* command, char* rep
     sprintf(reply, "> %s", _prefs->bridge_secret);
 #endif
   } else if (memcmp(config, "bootloader.ver", 14) == 0) {
-  #ifdef NRF52_PLATFORM
+  #if defined(NRF52_PLATFORM) || defined(NRF54_PLATFORM)
       char ver[32];
       if (_board->getBootloaderVersion(ver, sizeof(ver))) {
           sprintf(reply, "> %s", ver);

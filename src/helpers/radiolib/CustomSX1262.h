@@ -39,7 +39,8 @@ class CustomSX1262 : public SX1262 {
       MESH_DEBUG_PRINTLN("SX1262 regulator requested: %s", useRegulatorLDO ? "LDO" : "DC-DC");
 
   #if defined(P_LORA_SCLK)
-    #ifdef NRF52_PLATFORM
+    #if defined(NRF52_PLATFORM) || defined(NRF54_PLATFORM)
+      // nRF54L core exposes the same SPIClass::setPins(miso, sck, mosi) API
       if (spi) { spi->setPins(P_LORA_MISO, P_LORA_SCLK, P_LORA_MOSI); spi->begin(); }
     #elif defined(RP2040_PLATFORM)
       if (spi) {

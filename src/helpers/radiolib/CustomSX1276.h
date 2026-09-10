@@ -25,7 +25,7 @@ class CustomSX1276 : public SX1276 {
   #endif
 
   #if defined(P_LORA_SCLK)
-    #ifdef NRF52_PLATFORM
+    #if defined(NRF52_PLATFORM) || defined(NRF54_PLATFORM)
       if (spi) { spi->setPins(P_LORA_MISO, P_LORA_SCLK, P_LORA_MOSI); spi->begin(); }
     #elif defined(RP2040_PLATFORM)
       if (spi) {

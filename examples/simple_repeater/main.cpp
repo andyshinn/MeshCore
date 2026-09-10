@@ -45,7 +45,7 @@ void setup() {
   external_watchdog.begin();
 #endif
 
-#if defined(MESH_DEBUG) && defined(NRF52_PLATFORM)
+#if defined(MESH_DEBUG) && (defined(NRF52_PLATFORM) || defined(NRF54_PLATFORM))
   // give some extra time for serial to settle so
   // boot debug messages can be seen on terminal
   delay(5000);
@@ -68,7 +68,7 @@ void setup() {
   fast_rng.begin(radio_driver.getRngSeed());
 
   FILESYSTEM* fs;
-#if defined(NRF52_PLATFORM) || defined(STM32_PLATFORM)
+#if defined(NRF52_PLATFORM) || defined(NRF54_PLATFORM) || defined(STM32_PLATFORM)
   InternalFS.begin();
   fs = &InternalFS;
   IdentityStore store(InternalFS, "");
@@ -196,7 +196,7 @@ void loop() {
   external_watchdog.loop();
 #endif
   if (the_mesh.getNodePrefs()->powersaving_enabled && !the_mesh.hasPendingWork()) {
-#if defined(NRF52_PLATFORM)
+#if defined(NRF52_PLATFORM) || defined(NRF54_PLATFORM)
     board.sleep(0); // nrf ignores seconds param, sleeps whenever possible
 #else
     if (the_mesh.millisHasNowPassed(POWERSAVING_FIRSTSLEEP_SECS * 1000)) { // To check if it is time to sleep
