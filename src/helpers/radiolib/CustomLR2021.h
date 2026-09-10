@@ -2,6 +2,15 @@
 
 #include <RadioLib.h>
 #include "MeshCore.h"
+#include "LR2021Pram.h"
+
+// Base address of the LR2021's patch RAM. RadioLib has this in LR2021_registers.h,
+// but that header is private to the library's own .cpp files and is not reachable
+// via <RadioLib.h>, so it is repeated here.
+#define LR2021_PRAM_BASE_ADDR         0x801000
+// Words per SPI write, matching Semtech's lr20xx_patch_load_pram(). The chip's own
+// limit is 128 words per transfer, so this is comfortably within it.
+#define LR2021_PRAM_BLOCK_WORDS       32
 
 class CustomLR2021 : public LR2021 {
   uint32_t _preambleMillis = 66;
@@ -54,7 +63,36 @@ class CustomLR2021 : public LR2021 {
         Serial.println(status);
         return false;  // fail
       }
-    
+
+  #ifdef LR2021_LOAD_PRAM
+      // Opt-in, per board. This header is shared by boards that nobody here can put on
+      // a bench, and loading the patch changes radio bring-up on a chip whose firmware
+      // we cannot audit - so it is off unless a variant asks for it. Enabling it on a
+      // board means committing to a TX/RX soak test on that board.
+      //
+      // The patch has to go in *after* begin(), not before: PRAM is volatile and
+      // begin() resets the chip inside findChip(), which would wipe anything we had
+      // uploaded. Semtech's reference driver patches the chip before touching any
+      // radio settings, so once the patch is live we re-apply what begin() applied.
+      if (uploadPram()) {
+        int16_t st = standby();
+        if (st == RADIOLIB_ERR_NONE) st = config(RADIOLIB_LR2021_PACKET_TYPE_LORA);
+        if (st == RADIOLIB_ERR_NONE) st = setFrequency(LORA_FREQ);
+        if (st == RADIOLIB_ERR_NONE) st = setBandwidth(LORA_BW);
+        if (st == RADIOLIB_ERR_NONE) st = setSpreadingFactor(LORA_SF);
+        if (st == RADIOLIB_ERR_NONE) st = setCodingRate(cr);
+        if (st == RADIOLIB_ERR_NONE) st = setSyncWord(RADIOLIB_LR2021_LORA_SYNC_WORD_PRIVATE);
+        if (st == RADIOLIB_ERR_NONE) st = setOutputPower(LORA_TX_POWER);
+        if (st == RADIOLIB_ERR_NONE) st = setPreambleLength(16);
+        if (st == RADIOLIB_ERR_NONE) st = invertIQ(false);
+        if (st != RADIOLIB_ERR_NONE) {
+          Serial.print("ERROR: radio re-config after PRAM load failed: ");
+          Serial.println(st);
+          return false;  // radio is now in an unknown state, don't pretend otherwise
+        }
+      }
+  #endif
+
       setCRC(2);
       explicitHeader();
 
@@ -66,6 +104,64 @@ class CustomLR2021 : public LR2021 {
       return true;  // success
     }
     
+    // Uploads the Semtech firmware patch and activates it. RadioLib knows how to check
+    // for a patch (checkPramLoaded) and how to activate one (activatePram) but has no way
+    // to put one there, so on a cold boot there is nothing to activate and activatePram()
+    // just fails - hence doing the upload ourselves.
+    //
+    // This is a stopgap. It belongs in RadioLib, which owns writeRegMem32, the PRAM
+    // addresses and modSetup(), and could therefore patch the chip before configuring the
+    // radio the way Semtech's driver does - no reaching through RADIOLIB_GODMODE, and no
+    // hand-copied replay of begin()'s tail that will drift the next time RadioLib changes
+    // that sequence. Drop this in favour of a RadioLib API as soon as one exists.
+    //
+    // Returns true only if the patch was uploaded and activated by this call, i.e. the
+    // caller still has to restore the radio configuration. Any failure is reported and
+    // returns false: the radio works unpatched, so this is not worth aborting startup for.
+    bool uploadPram() {
+      bool loaded = false;
+      int16_t st = checkPramLoaded(&loaded);
+      if (st != RADIOLIB_ERR_NONE) {
+        Serial.print("WARNING: LR2021 PRAM check failed: ");
+        Serial.println(st);
+        return false;
+      }
+      if (loaded) return false;  // survived from a previous boot, nothing to do
+
+      const uint32_t* img = lr2021_pram_image();
+      for (int i = 0; i < LR2021_PRAM_IMAGE_LEN; i += LR2021_PRAM_BLOCK_WORDS) {
+        int n = LR2021_PRAM_IMAGE_LEN - i;
+        if (n > LR2021_PRAM_BLOCK_WORDS) n = LR2021_PRAM_BLOCK_WORDS;
+        st = writeRegMem32(LR2021_PRAM_BASE_ADDR + i * sizeof(uint32_t), &img[i], n);
+        if (st != RADIOLIB_ERR_NONE) {
+          Serial.print("WARNING: LR2021 PRAM write failed at word ");
+          Serial.print(i);
+          Serial.print(": ");
+          Serial.println(st);
+          return false;  // partial image: leave it inactive rather than activating garbage
+        }
+      }
+
+      st = activatePram();
+      if (st != RADIOLIB_ERR_NONE) {
+        Serial.print("WARNING: LR2021 PRAM activate failed: ");
+        Serial.println(st);
+        return false;
+      }
+
+      // the magic word only appears once the patch is actually running
+      if (checkPramLoaded(&loaded) != RADIOLIB_ERR_NONE || !loaded) {
+        Serial.println("WARNING: LR2021 PRAM did not come up after activate");
+        return false;
+      }
+
+      uint16_t ver = 0;
+      getPramVersion(&ver);
+      Serial.print("LR2021 PRAM loaded, version 0x");
+      Serial.println(ver, HEX);
+      return true;
+    }
+
     float getFreqMHz() const { return freqMHz; }
 
     bool getRxBoostedGainMode() const { return _rx_boosted; }
