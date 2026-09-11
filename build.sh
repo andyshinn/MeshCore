@@ -107,7 +107,7 @@ for section, options in data:
         for key, value in options:
             if key == 'build_flags':
                 for flag in value:
-                    match = re.search(r'(ESP32_PLATFORM|NRF52_PLATFORM|STM32_PLATFORM|RP2040_PLATFORM)', flag)
+                    match = re.search(r'(ESP32_PLATFORM|NRF52_PLATFORM|NRF54_PLATFORM|STM32_PLATFORM|RP2040_PLATFORM)', flag)
                     if match:
                         print(match.group(1))
                         sys.exit(0)
@@ -167,6 +167,16 @@ build_firmware() {
     python3 bin/uf2conv/uf2conv.py .pio/build/$1/firmware.hex -c -o .pio/build/$1/firmware.uf2 -f 0xADA52840
     cp .pio/build/$1/firmware.uf2 out/${FIRMWARE_FILENAME}.uf2 2>/dev/null || true
     cp .pio/build/$1/firmware.zip out/${FIRMWARE_FILENAME}.zip 2>/dev/null || true
+  fi
+
+  # build the DFU package for nrf54 boards, copy .zip and .hex to out folder
+  # (e.g: mmm_xiao_nrf54lm20a_lr2021_repeater-v1.0.0-SHA.zip). No .uf2: the
+  # nRF54L bootloader has no UF2 mode, only serial and BLE DFU. The .zip is the
+  # OTA/serial-DFU package; firmware.hex is the SoftDevice-merged image for SWD.
+  if [ "$ENV_PLATFORM" == "NRF54_PLATFORM" ]; then
+    pio run -t dfu -e $1
+    cp .pio/build/$1/firmware.zip out/${FIRMWARE_FILENAME}.zip 2>/dev/null || true
+    cp .pio/build/$1/firmware.hex out/${FIRMWARE_FILENAME}.hex 2>/dev/null || true
   fi
 
   # for stm32, copy .bin and .hex to out folder
