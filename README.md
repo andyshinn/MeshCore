@@ -86,6 +86,8 @@ MeshCore is designed for devices listed in the [MeshCore Flasher](https://meshco
 
 MeshCore is open-source software released under the MIT License. You are free to use, modify, and distribute it for personal and commercial projects.
 
+Some vendored third-party components carry their own licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 ## Contributing
 
 Please submit PR's using 'dev' as the base branch!

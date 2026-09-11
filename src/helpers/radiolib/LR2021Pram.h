@@ -37,16 +37,22 @@
  * v1.1.2-feature-202604 as
  *   smtc_rac_lib/radio_drivers/lr20xx_driver/inc/lr20xx_pram_lr2021.h
  *
- * The 560 words below were cross-checked against two independent redistributions
- * and are byte-for-byte identical in both:
+ * The 560 words below are upstream's. They were also cross-checked against two
+ * further redistributions; all three are byte-for-byte identical:
  *   - liquidraver/ZephCore  zephcore/adapters/radio/lr20xx/lr20xx_pram_lr2021.h
  *   - ExpressLRS/ExpressLRS src/lib/LR2021Driver/LR2021PRAM.h
- * Image: 560 words / 2240 bytes, word[0] == 0x600DB002 (the "PRAM loaded" magic),
- * sha256 of the little-endian byte image
+ * Image: 560 words / 2240 bytes, word[0] == 0x600DB002 (the "PRAM loaded" magic).
+ * sha256 of the image serialised as little-endian 32-bit words (2240 bytes, no
+ * header, no padding, no separators):
  *   a828f5bac9f1309bc02b06f0885d5061ebd91510f40ade951b34c4b23d6edc3f
- * Only the formatting differs here (zero-padded, 8 words per line); the values are
- * upstream's. The Clear BSD notice above is reproduced because its terms require
- * the copyright notice to be retained on redistribution.
+ * Only the formatting differs here (zero-padded, 8 words per line).
+ *
+ * Upstream ships that array with no per-file notice of any kind. The Clear BSD
+ * notice above is the one its neighbours in the same driver release carry --
+ * verbatim, year included, from lr20xx_pram_load.h, the loader for this image. It
+ * is reproduced here because those terms require the copyright notice to be
+ * retained on redistribution, and repeated in THIRD_PARTY_NOTICES.md so that the
+ * provenance is discoverable without reading this file.
  *
  * The PRAM is the LR2021's firmware patch RAM. It is volatile: it is lost on every
  * chip reset and must be re-uploaded and re-activated by the host before use.
