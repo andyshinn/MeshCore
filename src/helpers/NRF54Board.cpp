@@ -22,6 +22,12 @@ static void disconnect_callback(uint16_t conn_handle, uint8_t reason) {
 void NRF54Board::begin() {
   startup_reason = BD_STARTUP_NORMAL;
 
+  // Take this from the core, not from the register: the core latches
+  // NRF_RESET->RESETREAS during init() and immediately clears it
+  // (write-1-to-clear), long before setup() runs, so reading the register
+  // here would always yield zero.
+  reset_reason = readResetReason();
+
   // NOTE: nRF52 enables the CC310 TRNG here via USE_CC310_HW_CRYPTO. The
   // nRF54L equivalent is CRACEN (the core ships an nRF54Crypto library), but
   // MeshCore does not use it yet, so there is nothing to start.
@@ -64,6 +70,27 @@ float NRF54Board::getMCUTemperature() {
   // Core helper picks sd_temp_get() when the SoftDevice is enabled and falls
   // back to driving NRF_TEMP directly when it is not.
   return readCPUTemperature();
+}
+
+const char* NRF54Board::getResetReasonString(uint32_t reason) {
+  // Wake-from-System-OFF causes are tested first: they are the ones worth
+  // knowing about, and a wake can set a second bit alongside them. Note the
+  // nRF54L splits what nRF52 called DOG into DOG0/DOG1 and adds GRTC and
+  // SECTAMPER, so this is not a copy of NRF52Board::getResetReasonString().
+  if (reason & RESET_RESETREAS_OFF_Msk) return "Wake from GPIO";
+  if (reason & RESET_RESETREAS_LPCOMP_Msk) return "Wake from LPCOMP";
+  if (reason & RESET_RESETREAS_GRTC_Msk) return "Wake from GRTC";
+  if (reason & RESET_RESETREAS_VBUS_Msk) return "Wake from VBUS";
+  if (reason & RESET_RESETREAS_RESETPIN_Msk) return "Reset Pin";
+  if (reason & (RESET_RESETREAS_DOG0_Msk | RESET_RESETREAS_DOG1_Msk)) return "Watchdog";
+  if (reason & RESET_RESETREAS_SREQ_Msk) return "Soft Reset";
+  if (reason & RESET_RESETREAS_LOCKUP_Msk) return "CPU Lockup";
+  if (reason & RESET_RESETREAS_SECTAMPER_Msk) return "Tamper Detect";
+  if (reason & (RESET_RESETREAS_CTRLAPSOFT_Msk | RESET_RESETREAS_CTRLAPHARD_Msk |
+                RESET_RESETREAS_CTRLAPPIN_Msk | RESET_RESETREAS_DIF_Msk)) {
+    return "Debug Interface";
+  }
+  return "Cold Boot";
 }
 
 void NRF54Board::shutdownPeripherals() {
