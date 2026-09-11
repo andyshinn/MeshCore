@@ -8,9 +8,14 @@
  * Each peripheral block has a base; registers within it are byte offsets.
  */
 
-/* SYSREG -- used only to prove the part is alive, and for VBUS presence. */
-#define NPM_BASE_SYSREG           0x02
-#define NPM_VBUSINSTATUS          0x07   /* bit 0: VBUS input present */
+/*
+ * VBUSIN -- used only to prove the part is alive, and for VBUS presence.
+ * 0x02 is the VBUSIN bank; SYSTEM (which holds only SYSLABEL) is 0x01, so the
+ * name this block used to carry would have sent the next SYSTEM register to
+ * the wrong bank.
+ */
+#define NPM_BASE_VBUSIN           0x02
+#define NPM_VBUSINSTATUS          0x07   /* bit 0: VBUSINPRESENT */
 
 /* BCHARGER */
 #define NPM_BASE_BCHARGER         0x03
@@ -81,7 +86,7 @@ bool NPM1300::begin(TwoWire* wire, uint8_t addr) {
 
   /* Probe with a real register read; a bare address ACK is not proof of much. */
   uint8_t dummy;
-  if (!readReg(NPM_BASE_SYSREG, NPM_VBUSINSTATUS, &dummy)) {
+  if (!readReg(NPM_BASE_VBUSIN, NPM_VBUSINSTATUS, &dummy)) {
     _wire = NULL;
     return false;
   }
@@ -134,7 +139,7 @@ uint16_t NPM1300::getSysMilliVolts() {
 
 bool NPM1300::isVbusPresent() {
   uint8_t status;
-  if (!readReg(NPM_BASE_SYSREG, NPM_VBUSINSTATUS, &status)) return false;
+  if (!readReg(NPM_BASE_VBUSIN, NPM_VBUSINSTATUS, &status)) return false;
   return (status & 0x01) != 0;
 }
 
