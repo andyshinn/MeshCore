@@ -8,8 +8,10 @@
 // but that header is private to the library's own .cpp files and is not reachable
 // via <RadioLib.h>, so it is repeated here.
 #define LR2021_PRAM_BASE_ADDR         0x801000
-// Words per SPI write, matching Semtech's lr20xx_patch_load_pram(). The chip's own
-// limit is 128 words per transfer, so this is comfortably within it.
+// Words per SPI write, matching Semtech's lr20xx_patch_load_pram(). RadioLib caps a
+// WRITE_REG_MEM_32 payload at 128 *bytes* (RADIOLIB_LRXXXX_SPI_MAX_READ_WRITE_LEN),
+// so 32 words is exactly the ceiling, not a comfortable margin - raise it and
+// writeRegMem32() returns RADIOLIB_ERR_SPI_CMD_INVALID (-706) for every block.
 #define LR2021_PRAM_BLOCK_WORDS       32
 
 class CustomLR2021 : public LR2021 {
