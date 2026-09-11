@@ -169,8 +169,13 @@ class CustomLR2021 : public LR2021 {
     bool getRxBoostedGainMode() const { return _rx_boosted; }
 
     int16_t startReceive() override {
-      // include the PREAMBLE_DETECTED irq bit in reported flags
-      return LR2021::startReceive(RADIOLIB_LR2021_RX_TIMEOUT_INF, RADIOLIB_IRQ_RX_DEFAULT_FLAGS | (1UL << RADIOLIB_LR2021_IRQ_PREAMBLE_DETECTED), RADIOLIB_IRQ_RX_DEFAULT_MASK, 0);
+      // No preamble bit is added here on purpose. isReceiving() reads preamble and
+      // header-valid straight out of the chip's latched IRQ word, so they need no arming,
+      // and they must not go into the mask either - the mask is what actually reaches
+      // setDioIrqConfig(), and routing preamble-detect to the DIO pin would make setFlag()
+      // fire on every preamble. (The OR that used to be here was RADIOLIB_LR2021_IRQ_* -
+      // a bit mask, not a bit index - so it expanded to 1UL << 32 and compiled to nothing.)
+      return LR2021::startReceive(RADIOLIB_LR2021_RX_TIMEOUT_INF, RADIOLIB_IRQ_RX_DEFAULT_FLAGS, RADIOLIB_IRQ_RX_DEFAULT_MASK, 0);
     }
 
     bool isReceiving() {
