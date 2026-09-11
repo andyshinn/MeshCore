@@ -133,9 +133,15 @@ bool CommonRadioPrefs::handleCommand(const char* command, uint32_t sender_timest
     return true;
   }
   if (memcmp(command, "set tx ", 7) == 0) {
-    setTxPower(atoi(&command[7]));
-    radio_driver.setTxPower(getTxPower());
-    strcpy(reply, "OK");
+    int dbm = atoi(&command[7]);
+    // Apply to the radio before storing: a value the PA refuses must not be
+    // marked dirty, or CommonCLI saves it and the node reboots onto it.
+    if (dbm >= -128 && dbm <= 127 && radio_driver.setTxPower((int8_t) dbm)) {
+      setTxPower((int8_t) dbm);
+      strcpy(reply, "OK");
+    } else {
+      strcpy(reply, "Error, invalid tx power");
+    }
     return true;
   }
 

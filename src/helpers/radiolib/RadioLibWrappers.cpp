@@ -47,11 +47,18 @@ uint32_t RadioLibWrapper::getRngSeed() {
   return _radio->random(0x7FFFFFFF);
 }
 
-void RadioLibWrapper::setTxPower(int8_t dbm) {
+bool RadioLibWrapper::setTxPower(int8_t dbm) {
 #if defined(USE_LR2021)
-  idle();
+  idle();   // LR2021 needs standby to reprogram the PA; recvRaw() re-arms Rx on the next Dispatcher pass
 #endif
-  _radio->setOutputPower(dbm);
+  // Only the driver knows this chip's PA range (and, on SX127x, which PA the
+  // requested level selects), so let it be the sole authority and report back.
+  int err = _radio->setOutputPower(dbm);
+  if (err != RADIOLIB_ERR_NONE) {
+    MESH_DEBUG_PRINTLN("RadioLibWrapper: error: setOutputPower(%d)", err);
+    return false;
+  }
+  return true;
 }
 
 void RadioLibWrapper::idle() {

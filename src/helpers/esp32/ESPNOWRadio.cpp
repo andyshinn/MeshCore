@@ -58,8 +58,12 @@ uint32_t ESPNOWRadio::getRngSeed() {
   return millis() + intID();  // TODO: where to get some entropy?
 }
 
-void ESPNOWRadio::setTxPower(uint8_t dbm) {
+bool ESPNOWRadio::setTxPower(uint8_t dbm) {
+  // Deliberately not propagating esp_wifi_set_max_tx_power()'s status: the IDF
+  // range is 2..20 dBm, and reporting failure here would newly reject values
+  // these boards have always accepted (silently clamped) via `set tx`.
   esp_wifi_set_max_tx_power(dbm * 4);
+  return true;
 }
 
 uint32_t ESPNOWRadio::intID() {

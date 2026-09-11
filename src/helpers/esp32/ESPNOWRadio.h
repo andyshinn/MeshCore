@@ -42,7 +42,7 @@ public:
   virtual bool getRxBoostedGainMode() const { return false; }
 
   uint32_t intID();
-  void setTxPower(uint8_t dbm);
+  bool setTxPower(uint8_t dbm);
 };
 
 #if ESPNOW_DEBUG_LOGGING && ARDUINO
